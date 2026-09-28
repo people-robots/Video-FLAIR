@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Video-FLAIR: Not Whether to Reason, But How</title>
+  <meta name="description" content="Video-FLAIR learns to select a perceptual, compositional, or deliberative reasoning mode for each multimodal query using reinforcement learning. NeurIPS 2026.">
+  <meta name="keywords" content="Video-FLAIR, adaptive reasoning, multimodal LLM, video reasoning, reinforcement learning, NeurIPS 2026">
+  <meta property="og:title" content="Video-FLAIR: Not Whether to Reason, But How">
+  <meta property="og:description" content="Learning how to reason, not just whether to reason. NeurIPS 2026.">
+  <meta property="og:image" content="https://people-robots.github.io/Video-FLAIR/static/images/teaser.webp">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="static/images/sparkle.png">
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/main.js"></script>
+</head>
+
+<body>
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div id="navMenu" class="navbar-menu">
+      <div class="navbar-start is-centered-nav">
+        <a class="navbar-item section-link" href="#abstract">Abstract</a>
+        <a class="navbar-item section-link" href="#modes">Modes</a>
+        <a class="navbar-item section-link" href="#method">Method</a>
+        <a class="navbar-item section-link" href="#results">Results</a>
+        <a class="navbar-item section-link" href="#analysis">Analysis</a>
+        <a class="navbar-item section-link" href="#examples">Examples</a>
+        <a class="navbar-item section-link" href="#BibTeX">BibTeX</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">More Research</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://people-robots.github.io/EgoVITA/">EgoVITA</a>
+            <a class="navbar-item" href="https://people-robots.github.io/AVATAR/">AVATAR</a>
+            <a class="navbar-item" href="https://people-robots.github.io/VideoPASTA/">VideoPASTA</a>
+            <a class="navbar-item" href="https://people-robots.github.io/VideoSAVi/">VideoSAVi</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">
+              <span class="animated-gradient-title">Video-FLAIR</span><img src="static/images/sparkle.png" alt="Video-FLAIR icon" class="title-icon-image">
+            </h1>
+            <h2 class="subtitle is-3 publication-subtitle">Not Whether to Reason, But How</h2>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><a href="https://yogkul2000.github.io/">Yogesh Kulkarni</a><sup style="color:#6fbf73;">1</sup>,</span>
+              <span class="author-block"><a href="https://www.pooyanfazli.com/">Pooyan Fazli</a><sup style="color:#6fbf73;">1</sup></span>
+            </div>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup style="color:#6fbf73;">1</sup>Arizona State University</span><br>
+              <span class="venue">NeurIPS 2026</span>
+            </div>
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="https://openreview.net/forum?id=7IM0JvagQT" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2608.26495" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="ai ai-arxiv"></i></span>
+                    <span>arXiv</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a class="external-link button is-normal is-rounded is-dark is-soon" aria-disabled="true">
+                    <span class="icon"><i class="fab fa-github"></i></span>
+                    <span>Code (soon)</span>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="content has-text-centered">
+        <div class="figure-box">
+          <img src="static/images/teaser.webp" alt="Video-FLAIR routes three queries on the same video to DIRECT, CONCISE, and DEEP reasoning modes" style="width: 100%;">
+        </div>
+        <p>
+          Video-FLAIR routes each query to one of three reasoning modes based on its complexity. Highlights mark the key evidence driving each mode, namely screen-text reads (<span class="mode-tag direct">&lt;DIRECT&gt;</span>), timestamped event anchors (<span class="mode-tag concise">&lt;CONCISE&gt;</span>), and multiple cues synthesized into a conclusion (<span class="mode-tag deep">&lt;DEEP&gt;</span>).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="abstract">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Multimodal queries can require different types of reasoning. Some can be answered via <em>perceptual</em> reasoning, extracting information directly from the visual signal, while others require <em>compositional</em> reasoning that combines observations or <em>deliberative</em> reasoning that evaluates competing hypotheses. However, many existing methods apply a uniform reasoning strategy across queries, leading to unnecessary computation on simple tasks and insufficient reasoning on complex ones.
+            </p>
+            <p>
+              We introduce <b>Video-FLAIR</b>, a training framework that learns to select the appropriate reasoning mode for each query using reinforcement learning. During training, the model generates responses under all three modes for the same prompt, enabling direct comparison. A composite reward compares these responses to favor the most effective one based on correctness, grounding, and cost, while discouraging unsupported or misaligned deliberation. This yields a supervision signal for learning adaptive reasoning without per-query annotations.
+            </p>
+            <p>
+              Video-FLAIR improves accuracy over the Qwen2.5-VL base model by <b>+5.4</b> on MathVista, <b>+4.8</b> on Video-Holmes, and <b>+4.8</b> on Video-MMMU, while reducing average token usage to <b>95</b> compared to <b>417</b> for always-thinking baselines.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in" style="padding-top: 0;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Key Highlights</h2>
+          <div class="section-divider"></div>
+        </div>
+      </div>
+      <div class="columns is-centered is-multiline">
+        <div class="column is-3-desktop is-6-tablet">
+          <div class="highlight-card card-direct">
+            <div class="stat-number">+5.4</div>
+            <div class="stat-label">MathVista</div>
+            <div class="stat-detail">over Qwen2.5-VL-7B</div>
+          </div>
+        </div>
+        <div class="column is-3-desktop is-6-tablet">
+          <div class="highlight-card card-concise">
+            <div class="stat-number">+4.8</div>
+            <div class="stat-label">Video-Holmes</div>
+            <div class="stat-detail">over Qwen2.5-VL-7B</div>
+          </div>
+        </div>
+        <div class="column is-3-desktop is-6-tablet">
+          <div class="highlight-card card-deep">
+            <div class="stat-number">95</div>
+            <div class="stat-label">Avg. Tokens</div>
+            <div class="stat-detail">vs. 417 for always-thinking baselines</div>
+          </div>
+        </div>
+        <div class="column is-3-desktop is-6-tablet">
+          <div class="highlight-card card-adaptive">
+            <div class="stat-number">20 / 22</div>
+            <div class="stat-label">Significant Gains</div>
+            <div class="stat-detail">paired bootstrap over two base models</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in" id="modes">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Three Ways to Reason</h2>
+          <div class="section-divider"></div>
+          <div class="content has-text-justified">
+            <p>
+              Existing methods either apply the same reasoning strategy to every query or decide only <em>whether</em> to reason. Video-FLAIR instead treats reasoning as an adaptive process and chooses <em>how</em> to reason, distinguishing modes by the structure of their evidence chains rather than by their length.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered">
+        <div class="column">
+          <div class="mode-card direct">
+            <div class="mode-name">Percept</div>
+            <div class="mode-tag direct">&lt;DIRECT&gt;</div>
+            <p class="mt-3">Extracts a single observation that maps directly to the answer. The evidence chain has no branches and the reasoning path is immediate.</p>
+            <div class="mode-example">Reading on-screen text or identifying an object.</div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="mode-card concise">
+            <div class="mode-name">Compose</div>
+            <div class="mode-tag concise">&lt;CONCISE&gt;</div>
+            <p class="mt-3">Combines multiple observations through a linear sequence, where each step builds on the previous one without revisiting or branching.</p>
+            <div class="mode-example">Localizing an event across frames or computing a quantity from a chart.</div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="mode-card deep">
+            <div class="mode-name">Deliberate</div>
+            <div class="mode-tag deep">&lt;DEEP&gt;</div>
+            <p class="mt-3">Revisits the same evidence to evaluate and reject competing hypotheses. Depth reflects search over interpretations rather than longer chains.</p>
+            <div class="mode-example">Judging whether an athlete's behavior indicates confidence.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in is-tinted" id="method">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Method</h2>
+          <div class="section-divider"></div>
+          <div class="content has-text-justified">
+            <p>
+              Starting from an SFT warm-start on mode-structured traces, Video-FLAIR generates rollouts under every reasoning mode for the same prompt, scores them with a composite reward that includes an online verifier, and derives a utility that identifies the most effective mode. Advantages are normalized per reward component with GDPO, reweighted token by token, and used to update the policy with DAPO.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="figure-box">
+        <img src="static/images/pipeline.webp" alt="Video-FLAIR training pipeline with mode-structured rollouts, composite reward, DAPO update, and an online verifier refreshed with DPO" style="width: 100%;">
+        <p class="figure-caption">
+          Each video and query pair generates eight mode-structured rollouts. The verifier provides dense per-rollout feedback and is periodically refreshed with DPO on the highest and lowest reward rollouts.
+        </p>
+      </div>
+
+      <div class="columns is-centered" style="margin-top: 2rem;">
+        <div class="column is-four-fifths">
+          <h3 class="title is-4">Mode-Structured Rollouts</h3>
+          <div class="content has-text-justified">
+            <p>
+              For every query, the eight rollouts follow a fixed slot assignment. Six <b>controlled</b> slots force each mode twice, so the outcomes of all three modes can be compared on the same input. Two <b>adaptive</b> slots describe every mode without naming one, so the model must choose a mode before answering. This within-query comparison replaces per-query mode labels.
+            </p>
+          </div>
+          <div class="slot-row" aria-label="Rollout slots">
+            <div class="slot direct">DIRECT<small>slot 1</small></div>
+            <div class="slot direct">DIRECT<small>slot 2</small></div>
+            <div class="slot concise">CONCISE<small>slot 3</small></div>
+            <div class="slot concise">CONCISE<small>slot 4</small></div>
+            <div class="slot deep">DEEP<small>slot 5</small></div>
+            <div class="slot deep">DEEP<small>slot 6</small></div>
+            <div class="slot adaptive">ADAPTIVE<small>slot 7</small></div>
+            <div class="slot adaptive">ADAPTIVE<small>slot 8</small></div>
+          </div>
+          <div class="slot-legend">
+            <span>controlled slots, mode given in the prompt</span>
+            <span>adaptive slots, model selects</span>
+          </div>
+
+          <h3 class="title is-4" style="margin-top: 2.5rem;">Composite Reward</h3>
+          <div class="content has-text-justified">
+            <p>The seven reward terms form three functional groups, and each group contributes a distinct gain when added in turn.</p>
+          </div>
+          <div class="columns">
+            <div class="column">
+              <div class="reward-group g1">
+                <h4>Correctness</h4>
+                <div class="terms"><i>R</i><sub>ans</sub>, <i>R</i><sub>format</sub>, <i>R</i><sub>comply</sub></div>
+                <p class="is-size-7">Task accuracy by answer type, the output schema, and compliance with the assigned mode and its word budget.</p>
+              </div>
+            </div>
+            <div class="column">
+              <div class="reward-group g2">
+                <h4>Cost</h4>
+                <div class="terms"><i>R</i><sub>cost</sub>, <i>R</i><sub>balance</sub></div>
+                <p class="is-size-7">A difficulty-aware length penalty that is strong on easy queries and relaxed on hard ones, plus a term that prevents mode collapse.</p>
+              </div>
+            </div>
+            <div class="column">
+              <div class="reward-group g3">
+                <h4>Adaptive Selection</h4>
+                <div class="terms"><i>R</i><sub>select</sub>, <i>R</i><sub>verifier</sub></div>
+                <p class="is-size-7">Utility-derived supervision for the adaptive slots and dense grounding feedback from the online verifier.</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="title is-4" style="margin-top: 2rem;">Learning Which Mode Wins</h3>
+          <div class="content has-text-justified">
+            <p>
+              Within each rollout group, the controlled slots give every mode an accuracy <i>Ans</i>(<i>m</i>) and a verifier grounding score <i>G</i>(<i>m</i>). Their utility trades accuracy and grounding against cost, and the best mode <i>m</i><sup>*</sup> supervises the adaptive slots.
+            </p>
+          </div>
+          <div class="equation">
+            Utility(<i>m</i>) = ( Ans(<i>m</i>) + <i>&delta;</i> &middot; <i>G</i>(<i>m</i>) ) &middot; ( 1 &minus; Cost(<i>m</i>) ), &nbsp;&nbsp; <i>m</i><sup>*</sup> = arg&thinsp;max<sub><i>m</i></sub> Utility(<i>m</i>)
+          </div>
+          <div class="columns is-vcentered">
+            <div class="column">
+              <div class="figure-box">
+                <img src="static/images/utility_regions.webp" alt="Decision regions showing which reasoning mode wins under the utility">
+                <p class="figure-caption">More expensive modes win only when their accuracy and grounding gain exceeds their cost.</p>
+              </div>
+            </div>
+            <div class="column">
+              <div class="figure-box">
+                <img src="static/images/alp_scaling.webp" alt="Adaptive length penalty scaling with response length">
+                <p class="figure-caption">The adaptive length penalty grows with length and relaxes on hard queries, so <span class="mode-tag deep">&lt;DEEP&gt;</span> is not penalized when it is needed.</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="title is-4" style="margin-top: 2rem;">Online Verifier and Token-Level Credit</h3>
+          <div class="content has-text-justified">
+            <p>
+              A Qwen3-VL-8B verifier, initialized from the base checkpoint and never updated by the policy loss, scores each reasoning trace for temporal grounding, spatial grounding, and human alignment. Every 100 RL steps it is refreshed with DPO on pairs ranked by the full composite reward, where answer correctness dominates, so a well-grounded but wrong rollout is still rejected. Token-level credit then concentrates the gradient on evidence-bearing spans such as timestamps and object boxes, and away from hedging and filler.
+            </p>
+          </div>
+          <div class="figure-box" style="max-width: 640px; margin: 0 auto;">
+            <img src="static/images/token_credit.webp" alt="Token-level credit weights over a CONCISE reasoning trace">
+            <p class="figure-caption">Grounded spans receive high credit while hedging phrases such as &ldquo;I think&rdquo; and &ldquo;probably&rdquo; receive low credit.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in" id="results">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Results</h2>
+      <div class="section-divider"></div>
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <div class="content has-text-justified">
+            <p>
+              Across six image and five video benchmarks and two base models, Video-FLAIR improves accuracy while using a fraction of the tokens of always-thinking methods. Always-thinking baselines lose accuracy on perception-heavy tasks such as EMMA and HallusionBench, where long chains introduce visually ungrounded steps, while Video-FLAIR gains on every benchmark.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="columns is-centered is-mobile is-multiline" style="margin-bottom: 0.25rem;">
+        <div class="column is-narrow">
+          <div class="tabs is-toggle is-small" data-tab-group="suite">
+            <ul>
+              <li class="is-active" data-value="image"><a>Image benchmarks</a></li>
+              <li data-value="video"><a>Video benchmarks</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="column is-narrow">
+          <div class="tabs is-toggle is-small" data-tab-group="model">
+            <ul>
+              <li class="is-active" data-value="qwen25"><a>Qwen2.5-VL-7B</a></li>
+              <li data-value="qwen3"><a>Qwen3-VL-8B</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap" id="results-table"></div>
+      <p class="table-note">
+        Deltas are absolute changes over the base model. For Video-FLAIR, margins are 95% confidence intervals from a paired bootstrap over benchmark items, and &Dagger; marks a gain that is not significant at the 0.05 level. Best per column in bold. All results are reproduced under identical evaluation settings.
+      </p>
+
+      <div class="columns is-centered" style="margin-top: 2.5rem;">
+        <div class="column is-four-fifths">
+          <h3 class="title is-4 has-text-centered">Where Do the Gains Come From?</h3>
+          <p class="has-text-centered is-size-6 mb-4">Ablations on Qwen2.5-VL-7B isolate the contribution of the mode space, the reward groups, and learned selection.</p>
+        </div>
+      </div>
+      <div class="columns is-multiline is-centered">
+        <div class="column is-6">
+          <div class="box-gray">
+            <h4 class="title is-6 has-text-centered">Simpler Alternatives</h4>
+            <table class="mini-table">
+              <thead><tr><th>Method</th><th>MMMU</th><th>EMMA</th><th>V-Holmes</th><th>V-MMMU</th><th>Tok</th></tr></thead>
+              <tbody>
+                <tr><td>Base model</td><td>52.0</td><td>25.8</td><td>43.2</td><td>52.1</td><td>&ndash;</td></tr>
+                <tr><td>Zero-shot prompt</td><td>51.8</td><td>25.2</td><td>42.8</td><td>51.5</td><td>340</td></tr>
+                <tr><td>Static 64-token budget</td><td>44.5</td><td>18.2</td><td>33.8</td><td>42.0</td><td>64</td></tr>
+                <tr><td>SFT prompt selector</td><td>52.9</td><td>26.1</td><td>44.7</td><td>53.3</td><td>160</td></tr>
+                <tr><td>Router + SFT</td><td>53.5</td><td>26.5</td><td>46.0</td><td>54.5</td><td>85</td></tr>
+                <tr class="ours"><td>Video-FLAIR</td><td>54.5</td><td>27.3</td><td>48.0</td><td>56.9</td><td>61</td></tr>
+              </tbody>
+            </table>
+            <p class="card-note">Shorter answers alone do not explain the gains, and a learned router still trails RL by 2.0 points on Video-Holmes and 2.4 on Video-MMMU.</p>
+          </div>
+        </div>
+        <div class="column is-6">
+          <div class="box-gray">
+            <h4 class="title is-6 has-text-centered">Reward Groups Added in Turn</h4>
+            <table class="mini-table">
+              <thead><tr><th>Variant</th><th>MMMU</th><th>EMMA</th><th>V-MMMU</th><th>Tok</th></tr></thead>
+              <tbody>
+                <tr><td>Correctness only</td><td>51.8</td><td>21.9</td><td>49.8</td><td>412</td></tr>
+                <tr><td>+ Cost group</td><td>53.0</td><td>23.0</td><td>52.0</td><td>185</td></tr>
+                <tr><td>+ Selection</td><td>54.1</td><td>25.7</td><td>55.5</td><td>70</td></tr>
+                <tr class="ours"><td>+ Verifier (full)</td><td>54.5</td><td>27.3</td><td>56.9</td><td>67</td></tr>
+              </tbody>
+            </table>
+            <p class="card-note">The cost group cuts tokens, adaptive selection gives the largest accuracy gains, and the verifier improves grounding-sensitive benchmarks.</p>
+          </div>
+        </div>
+        <div class="column is-6">
+          <div class="box-gray">
+            <h4 class="title is-6 has-text-centered">Fixed Mode vs. Adaptive</h4>
+            <table class="mini-table">
+              <thead><tr><th>Mode</th><th>MMMU</th><th>EMMA</th><th>V-MMMU</th><th>Tok</th></tr></thead>
+              <tbody>
+                <tr><td>Forced <span class="mode-tag direct">&lt;DIRECT&gt;</span></td><td>51.4</td><td>22.1</td><td>49.7</td><td class="best">57</td></tr>
+                <tr><td>Forced <span class="mode-tag concise">&lt;CONCISE&gt;</span></td><td>53.1</td><td>25.6</td><td>53.2</td><td>247</td></tr>
+                <tr><td>Forced <span class="mode-tag deep">&lt;DEEP&gt;</span></td><td>52.8</td><td class="best">28.5</td><td>55.8</td><td>963</td></tr>
+                <tr class="ours"><td>Adaptive</td><td>54.5</td><td>27.3</td><td>56.9</td><td>67</td></tr>
+              </tbody>
+            </table>
+            <p class="card-note">No fixed mode matches adaptive selection. Forced <span class="mode-tag deep">&lt;DEEP&gt;</span> helps EMMA slightly but costs over 14&times; the tokens.</p>
+          </div>
+        </div>
+        <div class="column is-6">
+          <div class="box-gray">
+            <h4 class="title is-6 has-text-centered">Three Modes vs. a Binary Switch</h4>
+            <table class="mini-table">
+              <thead><tr><th>Mode space</th><th>MMMU</th><th>EMMA</th><th>V-MMMU</th><th>Tok</th></tr></thead>
+              <tbody>
+                <tr><td>Video-Auto-R1 (binary)</td><td>52.0</td><td>23.7</td><td>54.2</td><td>&ndash;</td></tr>
+                <tr><td>Direct / think (2 modes)</td><td>52.9</td><td>24.4</td><td>55.1</td><td>61</td></tr>
+                <tr class="ours"><td>Three modes</td><td>54.5</td><td>27.3</td><td>56.9</td><td>67</td></tr>
+              </tbody>
+            </table>
+            <p class="card-note">Merging <span class="mode-tag concise">&lt;CONCISE&gt;</span> and <span class="mode-tag deep">&lt;DEEP&gt;</span> into one thinking mode drops performance to the level of binary auto-thinking.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in is-tinted" id="analysis">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">How Does Video-FLAIR Reason?</h2>
+      <div class="section-divider"></div>
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <div class="content has-text-justified">
+            <p>
+              Mode selection tracks what each benchmark demands rather than cost alone. Retrieval-oriented benchmarks such as AI2D and HallusionBench stay mostly <span class="mode-tag direct">&lt;DIRECT&gt;</span>, while inference-heavy and research-level benchmarks shift toward <span class="mode-tag concise">&lt;CONCISE&gt;</span>. <span class="mode-tag deep">&lt;DEEP&gt;</span> is reserved for the small fraction of queries where competing explanations must be ruled out, and removing it hurts exactly those benchmarks.
+            </p>
+          </div>
+          <div class="mode-dist-legend">
+            <span><i style="background: var(--direct);"></i>&lt;DIRECT&gt;</span>
+            <span><i style="background: var(--concise);"></i>&lt;CONCISE&gt;</span>
+            <span><i style="background: var(--deep);"></i>&lt;DEEP&gt;</span>
+          </div>
+          <div id="mode-dist"></div>
+          <p class="table-note has-text-centered">Share of queries routed to each mode by Video-FLAIR, sorted by <span class="mode-tag direct">&lt;DIRECT&gt;</span> usage.</p>
+        </div>
+      </div>
+
+      <div class="columns is-centered" style="margin-top: 2rem;">
+        <div class="column is-four-fifths">
+          <h3 class="title is-4 has-text-centered">Gains Hold Across Categories and Model Families</h3>
+          <div class="content has-text-justified">
+            <p>
+              Always-thinking models collapse on image perception and video spatial reasoning, where verbose thinking hallucinates answers that should be read from the visual signal. Video-FLAIR is the only method with positive gains across all five categories on both base models.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered">
+        <div class="column is-5">
+          <div class="figure-box">
+            <img src="static/images/category_qwen25.webp" alt="Per-category gains over Qwen2.5-VL-7B">
+            <p class="figure-caption">Qwen2.5-VL-7B</p>
+          </div>
+        </div>
+        <div class="column is-5">
+          <div class="figure-box">
+            <img src="static/images/category_qwen3.webp" alt="Per-category gains over Qwen3-VL-8B">
+            <p class="figure-caption">Qwen3-VL-8B</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in" id="examples">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Qualitative Examples</h2>
+      <div class="section-divider"></div>
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <p class="has-text-centered is-size-6 mb-4">Each example pairs two queries on the same video, showing where mode selection succeeds and where it can still improve.</p>
+        </div>
+      </div>
+      <div class="tabs is-centered is-toggle is-small" data-tab-group="qual">
+        <ul>
+          <li class="is-active" data-value="1"><a>Causal hypothesis testing</a></li>
+          <li data-value="2"><a>Ruling out explanations</a></li>
+          <li data-value="3"><a>Hidden deliberation</a></li>
+          <li data-value="4"><a>Social reasoning</a></li>
+        </ul>
+      </div>
+
+      <div data-qual="1">
+        <div class="figure-box"><img src="static/images/qual_3.webp" alt="DEEP rules out a competing cause of the purple cube's displacement, and a counting query routed to DIRECT"></div>
+        <div class="qual-caption has-text-justified">
+          <p><span class="pill ok">Top</span>The query asks which cube displaced the purple cube. <span class="mode-tag deep">&lt;DEEP&gt;</span> establishes that the green cube enters the frame only after the impact, eliminating that hypothesis, and confirms gold-cube contact with timestamped boxes.</p>
+          <p><span class="pill miss">Bottom</span>Counting moving objects needs a running tally over the whole video. The policy routes to <span class="mode-tag direct">&lt;DIRECT&gt;</span>, inspects one frame, and reports 3 instead of 4, since the temporal structure calls for <span class="mode-tag concise">&lt;CONCISE&gt;</span>.</p>
+        </div>
+      </div>
+      <div data-qual="2" hidden>
+        <div class="figure-box"><img src="static/images/qual_4.webp" alt="DEEP eliminates three explanations for a child's distress, and an object query over-routed to CONCISE"></div>
+        <div class="qual-caption has-text-justified">
+          <p><span class="pill ok">Top</span>Three mutually exclusive explanations for a child's distress must each be eliminated. <span class="mode-tag deep">&lt;DEEP&gt;</span> tests flame fear, physical discomfort, and social overwhelm, tying every step to a timestamped observation.</p>
+          <p><span class="pill miss">Bottom</span>The object query is answerable from any single frame, yet <span class="mode-tag concise">&lt;CONCISE&gt;</span> chains three confirmations of the same cookie where <span class="mode-tag direct">&lt;DIRECT&gt;</span> would suffice.</p>
+        </div>
+      </div>
+      <div data-qual="3" hidden>
+        <div class="figure-box"><img src="static/images/qual_2.webp" alt="A rover control query that needs DEEP but is routed to CONCISE, and a wheel-count query answered with DIRECT"></div>
+        <div class="qual-caption has-text-justified">
+          <p><span class="pill miss">Top</span>Deciding whether a rover is autonomous or operator-controlled requires falsifying the autonomous hypothesis across controller presence, motion smoothness, and gaze. The policy routes to <span class="mode-tag concise">&lt;CONCISE&gt;</span>, which chains observations without weighing alternatives.</p>
+          <p><span class="pill ok">Bottom</span>Counting the rover's wheels involves no competing hypotheses and can be answered from any clear frame, so <span class="mode-tag direct">&lt;DIRECT&gt;</span> is the most efficient choice.</p>
+        </div>
+      </div>
+      <div data-qual="4" hidden>
+        <div class="figure-box"><img src="static/images/qual_1.webp" alt="A social reasoning query routed to DIRECT, and a timestamp query answered with CONCISE"></div>
+        <div class="qual-caption has-text-justified">
+          <p><span class="pill miss">Top</span>Assessing a character's emotional state requires weighing posture, gaze, and reaction across frames. Social queries can resemble single-frame lookups, and here the policy routes to <span class="mode-tag direct">&lt;DIRECT&gt;</span>.</p>
+          <p><span class="pill ok">Bottom</span>Finding every appearance of the Yellowjacket is a sequential scan, and <span class="mode-tag concise">&lt;CONCISE&gt;</span> correctly chains three grounded appearances across the video.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title is-3 has-text-centered">BibTeX</h2>
+      <div class="bibtex-wrap">
+        <button class="button is-small is-light copy-btn" id="copy-bibtex" type="button">
+          <span class="icon is-small"><i class="far fa-copy"></i></span>
+          <span>Copy</span>
+        </button>
+        <pre><code id="bibtex">@inproceedings{kulkarni2026videoflair,
+  title={Video-FLAIR: Not Whether to Reason, But How},
+  author={Yogesh Kulkarni and Pooyan Fazli},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2026}
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content has-text-centered">
+            <p>Website template adapted from <a href="https://nerfies.github.io/">Nerfies</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-label="Enlarged figure">
+    <img alt="">
+  </div>
+</body>
+</html>
